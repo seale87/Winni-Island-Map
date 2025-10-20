@@ -1,0 +1,50 @@
+[
+  {
+    "name": "Bear Island",
+    "lat": 43.6276,
+    "lng": -71.3619,
+    "town": "Meredith",
+    "size_acres": 780,
+    "public_access": false,
+    "has_bridge": false,
+    "notes": "One of the larger inhabited islands; private shorefront camps; church landing dock nearby.",
+    "image": "",
+    "link": ""
+  },
+  {
+    "name": "Rattlesnake Island",
+    "lat": 43.5957,
+    "lng": -71.2881,
+    "town": "Alton",
+    "size_acres": 136,
+    "public_access": false,
+    "has_bridge": false,
+    "notes": "Steep hiking trail to a scenic summit; private association dock system.",
+    "image": "",
+    "link": ""
+  },
+  {
+    "name": "Governor's Island",
+    "lat": 43.5839,
+    "lng": -71.4411,
+    "town": "Gilford",
+    "size_acres": 504,
+    "public_access": false,
+    "has_bridge": true,
+    "notes": "Connected by bridge; year-round access; high-end residential community.",
+    "image": "",
+    "link": ""
+  },
+  {
+    "name": "Cow Island",
+    "lat": 43.6538,
+    "lng": -71.3859,
+    "town": "Tuftonboro",
+    "size_acres": 520,
+    "public_access": false,
+    "has_bridge": false,
+    "notes": "Large private island with summer camps and residences.",
+    "image": "",
+    "link": ""
+  }
+]
