@@ -11,7 +11,7 @@
   },
   {
     "name": "Barndoor",
-    "town": "Wolfeboro",
+    "town": "Alton",
     "lat": 43.5561145,
     "lng": -71.223514,
     "size_acres": null,
@@ -300,10 +300,20 @@
     "notes": ""
   },
   {
-    "name": "Cub",
+    "name": "Rock",
     "town": "Gilford",
     "lat": 43.5917806,
     "lng": -71.3858853,
+    "size_acres": null,
+    "public_access": null,
+    "has_bridge": null,
+    "notes": ""
+  },
+    {
+    "name": "Cub",
+    "town": "Alton",
+    "lat": 43.54970,
+    "lng": -71.28595,
     "size_acres": null,
     "public_access": null,
     "has_bridge": null,
@@ -861,7 +871,7 @@
   },
   {
     "name": "Little Barndoor",
-    "town": "Wolfeboro",
+    "town": "Alton",
     "lat": 43.5616875,
     "lng": -71.2305425,
     "size_acres": null,
@@ -1251,7 +1261,7 @@
   },
   {
     "name": "Moose",
-    "town": "Wolfeboro",
+    "town": "Alton",
     "lat": 43.5474811,
     "lng": -71.2537933,
     "size_acres": null,
@@ -1521,79 +1531,9 @@
   },
   {
     "name": "Rattlesnake",
-    "town": "Wolfeboro",
+    "town": "Alton",
     "lat": 43.566566,
     "lng": -71.2892435,
-    "size_acres": null,
-    "public_access": null,
-    "has_bridge": null,
-    "notes": ""
-  },
-  {
-    "name": "Rock #1",
-    "town": "Gilford",
-    "lat": 43.5917806,
-    "lng": -71.3858853,
-    "size_acres": null,
-    "public_access": null,
-    "has_bridge": null,
-    "notes": ""
-  },
-  {
-    "name": "Rock #2",
-    "town": "Gilford",
-    "lat": 43.5917806,
-    "lng": -71.3858853,
-    "size_acres": null,
-    "public_access": null,
-    "has_bridge": null,
-    "notes": ""
-  },
-  {
-    "name": "Rocky Ridge #1",
-    "town": "Gilford",
-    "lat": 43.5917806,
-    "lng": -71.3858853,
-    "size_acres": null,
-    "public_access": null,
-    "has_bridge": null,
-    "notes": ""
-  },
-  {
-    "name": "Rocky Ridge #2",
-    "town": "Gilford",
-    "lat": 43.5917806,
-    "lng": -71.3858853,
-    "size_acres": null,
-    "public_access": null,
-    "has_bridge": null,
-    "notes": ""
-  },
-  {
-    "name": "Rocky Ridge #3",
-    "town": "Gilford",
-    "lat": 43.5917806,
-    "lng": -71.3858853,
-    "size_acres": null,
-    "public_access": null,
-    "has_bridge": null,
-    "notes": ""
-  },
-  {
-    "name": "Round #1",
-    "town": "Gilford",
-    "lat": 43.5917806,
-    "lng": -71.3858853,
-    "size_acres": null,
-    "public_access": null,
-    "has_bridge": null,
-    "notes": ""
-  },
-  {
-    "name": "Round #2",
-    "town": "Gilford",
-    "lat": 43.5917806,
-    "lng": -71.3858853,
     "size_acres": null,
     "public_access": null,
     "has_bridge": null,
@@ -1651,7 +1591,7 @@
   },
   {
     "name": "Ship",
-    "town": "Wolfeboro",
+    "town": "Alton",
     "lat": 43.5516723,
     "lng": -71.259575,
     "size_acres": null,
@@ -1671,7 +1611,7 @@
   },
   {
     "name": "Sleepers",
-    "town": "Wolfeboro",
+    "town": "Alton",
     "lat": 43.5530335,
     "lng": -71.292577,
     "size_acres": null,
@@ -1804,6 +1744,16 @@
     "town": "Gilford",
     "lat": 43.5917806,
     "lng": -71.3858853,
+    "size_acres": null,
+    "public_access": null,
+    "has_bridge": null,
+    "notes": ""
+  },
+    {
+    "name": "Treasure",
+    "town": "Alton",
+    "lat": 43.55118,
+    "lng": -71.28249,
     "size_acres": null,
     "public_access": null,
     "has_bridge": null,
