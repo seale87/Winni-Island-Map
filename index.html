@@ -30,15 +30,13 @@
   <div class="wrap">
     <div class="panel">
       <div class="controls">
-        <input id="search" class="search" type="search" placeholder="Search islands…"/>
+        <input id="search" class="search" type="search" placeholder="Search islands or towns…"/>
         <details class="filters">
           <summary>Filters</summary>
           <div class="filter-grid">
-            <label><input type="checkbox" data-filter="public_access" value="true"> Public access</label>
-            <label><input type="checkbox" data-filter="has_bridge" value="true"> Has bridge/causeway</label>
             <label style="display:grid;gap:4px">
               <span>Town</span>
-              <select id="town" multiple size="5"></select>
+              <select id="town" multiple size="6"></select>
             </label>
             <label style="display:grid;gap:4px">
               <span>Size (acres)</span>
@@ -72,7 +70,7 @@
     ];
 
     const qs = new URLSearchParams(location.search);
-    const PREFERRED = qs.get('data') || './islands.json'; // auto-load local islands.json if present
+    const DATA_URL = qs.get('data') || './islands.json'; // load local islands.json or override with ?data=
 
     const map = L.map('map').setView([43.616, -71.316], 11);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom:19, attribution:'&copy; OpenStreetMap contributors'}).addTo(map);
@@ -81,7 +79,6 @@
     map.on('drag', () => map.panInsideBounds(bounds, {animate:false}));
 
     const cluster = L.markerClusterGroup({ showCoverageOnHover:false, maxClusterRadius:50 });
-    const layer = L.layerGroup();
     let ALL = [], FILTERED = [];
 
     const elList = document.getElementById('list');
@@ -91,10 +88,8 @@
     const elTown = document.getElementById('town');
     const elSize = document.getElementById('size');
     const elReset = document.querySelector('.reset');
-    const cbs = Array.from(document.querySelectorAll('input[type="checkbox"][data-filter]'));
 
     function debounce(fn, ms){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a),ms);} }
-
     function bucket(ac){ if(ac==null) return ''; if(ac<5) return 'xs'; if(ac<25) return 's'; if(ac<100) return 'm'; if(ac<300) return 'l'; return 'xl'; }
     function normalize(f){
       return { name:f.name||'', lat:+f.lat, lng:+f.lng, town:f.town||'', size_acres:(f.size_acres!=null?+f.size_acres:null),
@@ -106,14 +101,14 @@
       return `<h3 style="margin:0 0 6px 0;">${f.name}</h3>${img}
         ${f.town?`<div><strong>Town:</strong> ${f.town}</div>`:''}
         ${f.size_acres!=null?`<div><strong>Size:</strong> ${f.size_acres} acres</div>`:''}
-        <div><strong>Public access:</strong> ${f.public_access?'Yes':'No'}</div>
-        <div><strong>Bridge/causeway:</strong> ${f.has_bridge?'Yes':'No'}</div>
+        ${typeof f.public_access==='boolean'?`<div><strong>Public access:</strong> ${f.public_access?'Yes':'No'}</div>`:''}
+        ${typeof f.has_bridge==='boolean'?`<div><strong>Bridge/causeway:</strong> ${f.has_bridge?'Yes':'No'}</div>`:''}
         ${f.notes?`<div>${f.notes}</div>`:''}
         ${f.link?`<div style="margin-top:6px;"><a href="${f.link}" target="_blank" rel="noopener">Learn more ↗</a></div>`:''}`;
     }
 
     function renderMarkers(arr){
-      cluster.clearLayers(); layer.clearLayers();
+      cluster.clearLayers();
       const markers = arr.filter(f=>Number.isFinite(f.lat)&&Number.isFinite(f.lng)).map(f=>{
         const m=L.marker([f.lat,f.lng],{title:f.name}); m.bindPopup(popupHTML(f)); return m;
       });
@@ -127,7 +122,7 @@
         const li=document.createElement('li');
         li.className='item';
         li.innerHTML=`<h4>${f.name}</h4>
-          <div class="meta">${f.town?`${f.town} · `:''}${f.size_acres!=null?`${f.size_acres} ac`:''}${f.public_access?` · Public: Yes`:''}</div>
+          <div class="meta">${[f.town, (f.size_acres!=null? (f.size_acres+' ac'):''), (f.public_access?'Public':'')].filter(Boolean).join(' · ')}</div>
           ${f.notes?`<div>${f.notes}</div>`:''}`;
         li.onclick=()=>{
           const tgt=cluster.getLayers().find(m=>m.getLatLng().lat===f.lat && m.getLatLng().lng===f.lng);
@@ -147,16 +142,16 @@
 
     function passFilters(f){
       const q=(elSearch.value||'').trim().toLowerCase();
-      if(q && !(f.name||'').toLowerCase().includes(q)) return false;
-      for(const cb of cbs){
-        if(cb.checked){
-          if(cb.dataset.filter==='public_access' && !f.public_access) return false;
-          if(cb.dataset.filter==='has_bridge' && !f.has_bridge) return false;
-        }
+      // SEARCH over name + town + notes
+      if (q) {
+        const hay = ((f.name||'') + ' ' + (f.town||'') + ' ' + (f.notes||'')).toLowerCase();
+        if (!hay.includes(q)) return false;
       }
-      const towns=[...elTown.selectedOptions].map(o=>o.value);
-      if(towns.length && (!f.town || !towns.includes(f.town))) return false;
-      if(elSize.value && bucket(f.size_acres)!==elSize.value) return false;
+      // Town multi-select filter
+      const selected = Array.from(elTown.selectedOptions).map(o => o.value);
+      if (selected.length && (!f.town || !selected.includes(f.town))) return false;
+      // Size bucket filter
+      if (elSize.value && bucket(f.size_acres)!==elSize.value) return false;
       return true;
     }
 
@@ -168,20 +163,20 @@
 
     function wire(){
       elSearch.addEventListener('input', debounce(applyFilters,120));
-      cbs.forEach(cb=>cb.addEventListener('change', applyFilters));
       elTown.addEventListener('change', applyFilters);
       elSize.addEventListener('change', applyFilters);
-      elReset.onclick=()=>{ elSearch.value=''; cbs.forEach(cb=>cb.checked=false); [...elTown.options].forEach(o=>o.selected=false); elSize.value=''; applyFilters(); };
+      elReset.onclick=()=>{ elSearch.value=''; [...elTown.options].forEach(o=>o.selected=false); elSize.value=''; applyFilters(); };
     }
 
-    function load(){
-      fetch(PREFERRED, {cache:'no-store'})
-        .then(r=>r.ok?r.json():Promise.reject())
-        .then(js=>{ ALL=(js||[]).map(normalize); after(); })
-        .catch(()=>{ ALL=FALLBACK.map(normalize); after(); });
-    }
-
-    function after(){
+    async function load(){
+      try{
+        const r = await fetch(DATA_URL, {cache:'no-store'});
+        if(!r.ok) throw 0;
+        const js = await r.json();
+        ALL = (js||[]).map(normalize);
+      } catch(e){
+        ALL = FALLBACK.map(normalize);
+      }
       hydrateTowns(ALL);
       FILTERED=ALL.slice();
       renderMarkers(FILTERED);
