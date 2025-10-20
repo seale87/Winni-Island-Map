@@ -1,0 +1,514 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Winnipesaukee Islands — Pro Matcher</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <style>
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Helvetica,Arial;line-height:1.45}
+    .grid{display:grid;grid-template-columns:430px 1fr;gap:12px;padding:12px}
+    @media (max-width:1000px){.grid{grid-template-columns:1fr}}
+    .card{border:1px solid #e5e7eb;border-radius:12px;background:#fff}
+    .card .hd{padding:10px 12px;border-bottom:1px solid #e5e7eb;font-weight:600}
+    .card .bd{padding:12px;max-height:calc(100vh - 140px);overflow:auto}
+    textarea{width:100%;min-height:200px;border:1px solid #d1d5db;border-radius:10px;padding:10px}
+    .btn{border:1px solid #d1d5db;background:#f9fafb;border-radius:8px;padding:8px 10px;cursor:pointer}
+    #map{height:72vh;border:1px solid #e5e7eb;border-radius:12px}
+    .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+    .mono{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;font-size:.85rem;white-space:pre-wrap;color:#374151}
+    .tag{display:inline-block;background:#eef2ff;color:#3730a3;border-radius:999px;padding:2px 8px;font-size:.72rem}
+    .tbl{border-collapse:collapse;width:100%}
+    .tbl th,.tbl td{border:1px solid #e5e7eb;padding:6px 8px;text-align:left;font-size:.9rem}
+    .ok{color:#065f46}
+    .warn{color:#b45309}
+    .err{color:#b91c1c}
+    .sel{background:#fef3c7}
+  </style>
+</head>
+<body>
+  <div class="grid">
+    <div class="card">
+      <div class="hd">Your list</div>
+      <div class="bd">
+        <p>Paste the full island list (one per line). Then:</p>
+        <ol>
+          <li>Click <b>Fetch baseline</b> → pulls all OSM “island/islet” & named “natural=island” features.</li>
+          <li>Click <b>Match names</b> → fuzzy match to baseline.</li>
+          <li>Click <b>Deep match</b> → per-name Overpass regex for any <i>unmatched</i> names.</li>
+          <li>(Optional) Select an unmatched row and <b>click on the map</b> to set its coordinates.</li>
+          <li>Click <b>Download islands.json</b> → upload to your repo.</li>
+        </ol>
+        <textarea id="names">Badger
+Barndoor
+Battleship
+Beaver
+Bear
+Becky’s Garden
+Big
+Big Beaver
+Birch #1
+Birch #2
+Black
+Black Cat
+Blanche
+Blanchards
+Blueberry
+Breezy
+Brew
+Camp
+Chase's
+Children's
+Chip
+Church
+Christmas
+Cosy
+Cove
+Cove #1
+Cove #2
+Cove #3
+Cow
+Crescent
+Cub
+Dale
+Devens
+Diamond
+Dollar
+Dolly
+Dow
+Eagle
+East Twin
+Echo
+Evergreen
+Farm
+Far Ozone
+Fish
+Five Mile
+Foley's
+Ganzey
+Gem
+Gichigumi
+Glines
+Goodwin
+Goose
+Goose Egg Rock
+Governor's
+Grant
+Guay
+Gun
+Gypsy
+Half-Acre
+Half Mile #1
+Half Mile #2
+Harbour
+Harmony
+Harvard
+Hawk’s Nest
+Helen
+Hemlock Point
+Hen
+Hermit
+Horse
+Hull
+Hurricane
+Indian
+Jib
+Joe's
+Jolly
+Keel
+Keniston
+Kinneho
+Isle of Pines
+Ledge
+Leroy
+Less In Area
+Lincoln
+Little
+Little Badger
+Little Barndoor
+Little Bear
+Little Beaver
+Little Birch
+Little Blueberry
+Little Camp
+Little Cove
+Little Ganzey
+Little Goodwin
+Little Huck
+Little Keniston
+Little Loon
+Little Mark
+Little One Mile
+Little Pine Tree
+Little Pine #1
+Little Pine #2
+Little Pine #3
+Little Plum
+Little Ragged
+Little Six Mile
+Little Two Mile
+Little Vixen
+Little Whortleberry
+Littlest Mud
+Loan's
+Lockes
+Long Pine
+Loon #1
+Loon #2
+Loon #3
+Loon #4
+Long
+Mark
+Melody
+Melvin
+Middle Beaver
+Mink
+Mt. Major
+Moose
+Nabby’s
+Nine Acre
+North Pasture
+Oak
+October Eve
+One Mile
+Outlaw
+Overnight
+Palmer
+Parker
+Penny #1
+Penny #2
+Perch
+Pig
+Pine
+Pinehurst
+Pistol
+Pitchwood
+PixieRock #3
+Pleasant
+Pop
+Poplar
+Quarter Mile
+Racoon
+Ragged
+Randall
+Rattlesnake
+Rock #1
+Rock #2
+Rocky Ridge #1
+Rocky Ridge #2
+Rocky Ridge #3
+Round #1
+Round #2
+Saint's Rest
+Sandy
+Scavenger
+Shelter
+Shephard
+Ship
+Six Mile
+Sleepers
+Small
+Spectacle (N)
+Spectacle (S)
+Spider
+Spring
+Squirrel
+Starr
+Steamboat
+Stonedam
+Store
+Three Mile
+Timber
+Tip
+Treasure
+Two Mile
+Uppershoe
+Wallace
+Welch
+Welcome
+Wentworth
+Whaleback
+Whaleback Point
+Whortleberry
+Winch
+Windswept
+Worcester</textarea>
+
+        <div class="row" style="margin-top:8px">
+          <button class="btn" id="fetch">Fetch baseline</button>
+          <button class="btn" id="match" disabled>Match names</button>
+          <button class="btn" id="deep" disabled>Deep match (per-name)</button>
+          <button class="btn" id="download" disabled>Download islands.json</button>
+          <span id="counts" class="tag"></span>
+        </div>
+        <div class="mono" id="log" style="margin-top:8px;max-height:160px;overflow:auto"></div>
+        <div id="table"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="hd">Map</div>
+      <div class="bd">
+        <div id="map"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    const log = (...a)=>{ const el=document.getElementById('log'); el.textContent += a.join(' ') + '\\n'; el.scrollTop = el.scrollHeight; };
+    const s=43.50, w=-71.50, n=43.80, e=-71.15;
+
+    // Map
+    const map = L.map('map').setView([43.616, -71.316], 11);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom:19, attribution:'&copy; OpenStreetMap contributors'}).addTo(map);
+    map.setMaxBounds(L.latLngBounds([s, w],[n, e]));
+    map.on('drag', () => map.panInsideBounds(L.latLngBounds([s,w],[n,e]), {animate:false}));
+    const markers = L.layerGroup().addTo(map);
+
+    // Town reference points
+    const TOWNS = [
+      {name:'Meredith',        lat:43.6570, lng:-71.5009},
+      {name:'Center Harbor',   lat:43.7098, lng:-71.4359},
+      {name:'Moultonborough',  lat:43.7599, lng:-71.3965},
+      {name:'Tuftonboro',      lat:43.6959, lng:-71.2090},
+      {name:'Wolfeboro',       lat:43.5834, lng:-71.2096},
+      {name:'Alton',           lat:43.4495, lng:-71.2234},
+      {name:'Gilford',         lat:43.5471, lng:-71.4073},
+      {name:'Laconia',         lat:43.5279, lng:-71.4704}
+    ];
+    const toRad = d => d*Math.PI/180;
+    const haversine = (a,b) => {
+      const R=6371000, dLat=toRad(b.lat-a.lat), dLng=toRad(b.lng-a.lng);
+      const s=Math.sin(dLat/2)**2 + Math.cos(toRad(a.lat))*Math.cos(toRad(b.lat))*Math.sin(dLng/2)**2;
+      return 2*R*Math.asin(Math.sqrt(s));
+    };
+    const nearestTown = (lat,lng)=>{ const p={lat,lng}; let best=null; for(const t of TOWNS){ const d=haversine(p,t); if(!best||d<best.d) best={name:t.name,d}; } return best?best.name:''; };
+
+    // Normalization / fuzzy
+    const norm = s => (s||'')
+      .toLowerCase()
+      .replace(/[’']/g, '')
+      .replace(/[^a-z0-9\s#]/g, ' ')
+      .replace(/\b(island|isle|rock|point|mt|mount|is\.)\b/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+    const fixups = new Map([
+      ['racoon','raccoon'],
+      ['governors','governor s'],
+      ['hawks nest','hawk s nest'],
+      ['starr','star'],
+      ['pixierock','pixie rock'],
+      ['mt major','mount major']
+    ]);
+    const fix = s => fixups.get(s) || s;
+
+    let OSM = [];     // baseline
+    let BYNAME = [];  // deep per-name results
+    let LIST = [];    // pasted names
+    let MATCHED = []; // final objects
+
+    async function overpassPOST(query){
+      const endpoints = [
+        'https://overpass-api.de/api/interpreter',
+        'https://overpass.kumi.systems/api/interpreter',
+        'https://maps.mail.ru/osm/tools/overpass/api/interpreter'
+      ];
+      for(const base of endpoints){
+        try{
+          const res = await fetch(base, {
+            method:'POST',
+            headers: {'Content-Type':'application/x-www-form-urlencoded; charset=UTF-8'},
+            body: 'data=' + encodeURIComponent(query)
+          });
+          if(!res.ok){ log('HTTP '+res.status+' '+base); continue; }
+          const js = await res.json();
+          return js.elements||[];
+        }catch(e){ log('Err '+base+': '+(e.message||e)); }
+      }
+      return [];
+    }
+
+    async function fetchBaseline(){
+      const q = `[out:json][timeout:50];
+        ( node["place"~"^(island|islet)$"](${s},${w},${n},${e});
+          way["place"~"^(island|islet)$"](${s},${w},${n},${e});
+          relation["place"~"^(island|islet)$"](${s},${w},${n},${e});
+          way["natural"="island"]["name"](${s},${w},${n},${e});
+          relation["natural"="island"]["name"](${s},${w},${n},${e});
+        ); out center tags;`;
+      log('Fetching baseline…');
+      const els = await overpassPOST(q);
+      log('Baseline elements: '+els.length);
+      const feats = els.map(e=>{
+        const nm = e.tags && (e.tags.name || e.tags.alt_name || e.tags.old_name);
+        const lat = e.type==='node' ? e.lat : (e.center && e.center.lat);
+        const lon = e.type==='node' ? e.lon : (e.center && e.center.lon);
+        return nm && lat && lon ? {name:nm, lat:lat, lng:lon} : null;
+      }).filter(Boolean);
+      // dedupe
+      const seen=new Set(), uniq=[];
+      for(const f of feats){
+        const k = f.name.toLowerCase()+'|'+f.lat.toFixed(5)+'|'+f.lng.toFixed(5);
+        if(!seen.has(k)){ seen.add(k); uniq.push(f); }
+      }
+      OSM = uniq;
+      log('Baseline unique: '+OSM.length);
+      drawMarkers(OSM, '#3388ff');
+      document.getElementById('match').disabled = false;
+    }
+
+    function drawMarkers(arr, color){
+      markers.clearLayers();
+      arr.forEach(f=> L.circleMarker([f.lat,f.lng], {radius:5}).addTo(markers).bindPopup('<b>'+f.name+'</b>'));
+      if(arr.length){ map.fitBounds(L.featureGroup(arr.map(f=>L.marker([f.lat,f.lng]))).getBounds(), {padding:[30,30]}); }
+    }
+
+    function doMatch(){
+      const orig = document.getElementById('names').value.split(/\n+/).map(s=>s.trim()).filter(Boolean);
+      LIST = orig;
+      const osmIndex = new Map();
+      OSM.forEach(f=>{ const k = fix(norm(f.name)); if(!osmIndex.has(k)) osmIndex.set(k, f); });
+      const osmArr = OSM.map(f=>({...f, key: fix(norm(f.name))}));
+
+      MATCHED = orig.map(name=>{
+        const cleaned = fix(norm(name));
+        let hit = osmIndex.get(cleaned);
+        if(!hit){
+          const variant = cleaned.replace(/#\s*(\d+)/,'$1').replace(/\((.*?)\)/g,'').trim();
+          hit = osmIndex.get(variant);
+        }
+        if(!hit){
+          let best=null;
+          for(const cand of osmArr){
+            if(cand.key.includes(cleaned) || cleaned.includes(cand.key)){ best=cand; break; }
+            const d = lev(cleaned, cand.key);
+            if(!best || d < best.d) best = {...cand, d};
+          }
+          if(best && (best.d===undefined || best.d <= 3)) hit = best;
+        }
+        const rec = { name, town:'', lat: hit?hit.lat:null, lng: hit?hit.lng:null, matched: !!hit, src:'baseline' };
+        if(hit) rec.town = nearestTown(hit.lat, hit.lng);
+        return rec;
+      });
+
+      render();
+      document.getElementById('deep').disabled = false;
+    }
+
+    // Levenshtein
+    function lev(a,b){
+      a=a||''; b=b||'';
+      const m=a.length, n=b.length;
+      const dp = Array.from({length:m+1},()=>Array(n+1).fill(0));
+      for(let i=0;i<=m;i++) dp[i][0]=i;
+      for(let j=0;j<=n;j++) dp[0][j]=j;
+      for(let i=1;i<=m;i++){ for(let j=1;j<=n;j++){ const cost=a[i-1]===b[j-1]?0:1;
+        dp[i][j]=Math.min(dp[i-1][j]+1, dp[i][j-1]+1, dp[i-1][j-1]+cost); }}
+      return dp[m][n];
+    }
+
+    function escRe(s){
+      return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+    function buildRegexFromName(name){
+      // Turn "Goose Egg Rock" -> (?i)\bgoose\b.*\begg\b.*\brock\b(?: Island| Isle)?$
+      const tokens = norm(name).replace(/#/g,'').split(' ').filter(Boolean);
+      if(!tokens.length) return '(?i)^$';
+      const inner = tokens.map(t=>escRe(t)).join('.*');
+      return '(?i)\\b'+inner+'\\b(?: Island| Isle)?$';
+    }
+
+    async function deepMatch(){
+      const unmatched = MATCHED.filter(r=>!r.matched);
+      if(!unmatched.length){ log('Nothing to deep-match.'); document.getElementById('download').disabled=false; return; }
+      log('Deep-matching '+unmatched.length+' names via Overpass…');
+      let hits=0;
+      for(let i=0;i<unmatched.length;i++){
+        const nm = unmatched[i].name;
+        const re = buildRegexFromName(nm);
+        const q = `[out:json][timeout:30];
+          ( nwr["name"~"${re}"](${s},${w},${n},${e}); );
+          out center tags;`;
+        const els = await overpassPOST(q);
+        let feat=null;
+        if(els && els.length){
+          // pick the first with center/latlng
+          for(const e of els){
+            const lat = e.type==='node' ? e.lat : (e.center && e.center.lat);
+            const lon = e.type==='node' ? e.lon : (e.center && e.center.lon);
+            if(lat && lon){ feat={lat, lng:lon, name:(e.tags && e.tags.name)||nm}; break; }
+          }
+        }
+        if(feat){
+          unmatched[i].lat = feat.lat; unmatched[i].lng = feat.lng; unmatched[i].matched = true; unmatched[i].src='by-name';
+          unmatched[i].town = nearestTown(feat.lat, feat.lng);
+          hits++;
+        }
+        if((i+1)%10===0) log(`…${i+1}/${unmatched.length}`);
+        await new Promise(r=>setTimeout(r, 250)); // be polite
+      }
+      log('Deep-match hits: '+hits);
+      render();
+      document.getElementById('download').disabled = false;
+    }
+
+    // Manual assign by clicking map
+    let selectedRow = -1;
+    map.on('click', (ev)=>{
+      if(selectedRow<0) return;
+      const r = MATCHED[selectedRow];
+      r.lat = ev.latlng.lat; r.lng = ev.latlng.lng;
+      r.town = nearestTown(r.lat, r.lng);
+      r.matched = true; r.src = 'manual';
+      render();
+    });
+
+    function render(){
+      markers.clearLayers();
+      MATCHED.forEach(r=>{
+        if(r.lat!=null && r.lng!=null){
+          L.marker([r.lat,r.lng], {title:r.name}).addTo(markers).bindPopup(`<b>${r.name}</b><br>${r.town||''}`);
+        }
+      });
+      if(MATCHED.some(r=>r.lat!=null)) {
+        map.fitBounds(L.featureGroup(MATCHED.filter(r=>r.lat!=null).map(r=>L.marker([r.lat,r.lng]))).getBounds(), {padding:[30,30]});
+      }
+      const ok = MATCHED.filter(r=>r.lat!=null).length;
+      document.getElementById('counts').textContent = ok + ' / ' + MATCHED.length + ' matched';
+
+      // Table
+      const rows = MATCHED.map((r,idx)=>`<tr class="${idx===selectedRow?'sel':''}" data-idx="${idx}">
+        <td>${r.name}</td>
+        <td>${r.town||''}</td>
+        <td>${r.lat!=null? r.lat.toFixed(6):'<span class="warn">unmatched</span>'}</td>
+        <td>${r.lng!=null? r.lng.toFixed(6):''}</td>
+        <td>${r.src||''}</td>
+      </tr>`).join('');
+      document.getElementById('table').innerHTML = `
+        <table class="tbl">
+          <thead><tr><th>Name</th><th>Town</th><th>Lat</th><th>Lng</th><th>Source</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>`;
+      document.querySelectorAll('#table tr[data-idx]').forEach(tr=>{
+        tr.onclick = ()=>{ selectedRow = +tr.dataset.idx; render(); };
+      });
+    }
+
+    function download(){
+      const out = MATCHED.map(r=>({
+        name: r.name, town: r.town||'', lat: r.lat, lng: r.lng,
+        size_acres: null, public_access: null, has_bridge: null, notes: ''
+      }));
+      const blob = new Blob([JSON.stringify(out, null, 2)], {type:'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download='islands.json'; a.click();
+      setTimeout(()=>URL.revokeObjectURL(url), 3000);
+    }
+
+    document.getElementById('fetch').onclick = fetchBaseline;
+    document.getElementById('match').onclick = doMatch;
+    document.getElementById('deep').onclick = deepMatch;
+    document.getElementById('download').onclick = download;
+  </script>
+</body>
+</html>
