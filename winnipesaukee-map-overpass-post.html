@@ -1,0 +1,288 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Winnipesaukee Islands — Overpass (POST) + Towns</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css">
+  <style>
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Helvetica,Arial}
+    .wrap{display:grid;grid-template-columns:360px 1fr;gap:12px;padding:12px}
+    @media (max-width: 900px){.wrap{grid-template-columns:1fr;}}
+    .panel{border:1px solid #e5e7eb;border-radius:12px;padding:12px;background:#fff;max-height:calc(100vh - 24px);overflow:auto}
+    .controls{display:grid;gap:8px;margin-bottom:8px}
+    .search{width:100%;padding:8px 10px;border:1px solid #d1d5db;border-radius:10px}
+    .filters summary{cursor:pointer;margin:6px 0;font-weight:600}
+    .filter-grid{display:grid;gap:8px;margin:8px 0}
+    .reset{margin-top:8px;border:1px solid #d1d5db;background:#f9fafb;border-radius:8px;padding:6px 10px;cursor:pointer}
+    .stats{font-size:.9rem;color:#111827;margin:6px 0}
+    .list{list-style:none;padding:0;margin:0;display:grid;gap:6px}
+    .item{border:1px solid #e5e7eb;border-radius:10px;padding:8px}
+    .item h4{margin:0 0 4px 0;font-size:1rem}
+    .item .meta{font-size:.85rem;color:#6b7280}
+    #map{border:1px solid #e5e7eb;border-radius:12px;min-height:70vh}
+    .leaflet-popup-content img{max-width:220px;height:auto;border-radius:8px;display:block;margin:6px 0}
+    .note{font-size:.85rem;color:#6b7280;margin-top:6px}
+    .log{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; font-size:.8rem; color:#6b7280; white-space:pre-line}
+    .btn{border:1px solid #d1d5db;background:#f9fafb;border-radius:8px;padding:6px 10px;cursor:pointer}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="panel">
+      <div class="controls">
+        <input id="search" class="search" type="search" placeholder="Search island names or towns…"/>
+        <div class="stats">
+          <strong><span id="vis">0</span> of <span id="tot">0</span></strong> islands shown
+          <button id="dl" class="btn" style="margin-left:8px">Download JSON</button>
+        </div>
+        <details class="filters">
+          <summary>Filters</summary>
+          <div class="filter-grid">
+            <label style="display:grid;gap:4px">
+              <span>Town</span>
+              <select id="town" multiple size="8"></select>
+            </label>
+            <label style="display:grid;gap:4px">
+              <span>Size (acres)</span>
+              <select id="size">
+                <option value="">All</option>
+                <option value="xs">Under 5</option>
+                <option value="s">5–25</option>
+                <option value="m">25–100</option>
+                <option value="l">100–300</option>
+                <option value="xl">300+</option>
+              </select>
+            </label>
+          </div>
+          <button class="reset btn" type="button">Reset filters</button>
+        </details>
+        <div class="note">This version uses <b>POST</b> to Overpass (shorter query) and assigns <b>Town</b> by nearest shoreline town. If Overpass is slow, add your own data with <code>?data=...</code>.</div>
+        <div class="log" id="log"></div>
+      </div>
+      <ul class="list" id="list" aria-live="polite"></ul>
+    </div>
+    <div id="map"></div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+  <script>
+    const log = (...a)=>{ const el=document.getElementById('log'); el.textContent += a.join(' ') + '\\n'; };
+
+    const qs = new URLSearchParams(location.search);
+    const DATA_URL = qs.get('data') || ''; // if provided, skip Overpass
+
+    // Lake bbox
+    const BBOX = { s:43.50, w:-71.50, n:43.80, e:-71.15 };
+
+    // Town reference points (approx centers) for assignment
+    const TOWNS = [
+      {name:'Meredith',        lat:43.6570, lng:-71.5009},
+      {name:'Center Harbor',   lat:43.7098, lng:-71.4359},
+      {name:'Moultonborough',  lat:43.7599, lng:-71.3965},
+      {name:'Tuftonboro',      lat:43.6959, lng:-71.2090},
+      {name:'Wolfeboro',       lat:43.5834, lng:-71.2096},
+      {name:'Alton',           lat:43.4495, lng:-71.2234},
+      {name:'Gilford',         lat:43.5471, lng:-71.4073},
+      {name:'Laconia',         lat:43.5279, lng:-71.4704}
+    ];
+
+    // Map
+    const map = L.map('map').setView([43.616, -71.316], 11);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom:19, attribution:'&copy; OpenStreetMap contributors'}).addTo(map);
+    const bounds = L.latLngBounds([BBOX.s, BBOX.w], [BBOX.n, BBOX.e]);
+    map.setMaxBounds(bounds);
+    map.on('drag', () => map.panInsideBounds(bounds, {animate:false}));
+
+    const cluster = L.markerClusterGroup({ showCoverageOnHover:false, maxClusterRadius:50 });
+    let ALL = [], FILTERED = [];
+
+    const elList = document.getElementById('list');
+    const elVis = document.getElementById('vis');
+    const elTot = document.getElementById('tot');
+    const elSearch = document.getElementById('search');
+    const elTown = document.getElementById('town');
+    const elSize = document.getElementById('size');
+    const elReset = document.querySelector('.reset');
+
+    const endpoints = [
+      'https://overpass-api.de/api/interpreter',
+      'https://overpass.kumi.systems/api/interpreter',
+      'https://maps.mail.ru/osm/tools/overpass/api/interpreter'
+    ];
+
+    function debounce(fn, ms){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a),ms);} }
+    function bucket(ac){ if(ac==null) return ''; if(ac<5) return 'xs'; if(ac<25) return 's'; if(ac<100) return 'm'; if(ac<300) return 'l'; return 'xl'; }
+    const toRad = d=>d*Math.PI/180;
+    function haversine(a,b){
+      const R=6371000, dLat=toRad(b.lat-a.lat), dLng=toRad(b.lng-a.lng);
+      const s = Math.sin(dLat/2)**2 + Math.cos(toRad(a.lat))*Math.cos(toRad(b.lat))*Math.sin(dLng/2)**2;
+      return 2*R*Math.asin(Math.sqrt(s));
+    }
+    function nearestTown(lat,lng){
+      const p = {lat,lng};
+      let best=null;
+      for(const t of TOWNS){
+        const d = haversine(p, t);
+        if(!best || d<best.d) best = {name:t.name, d};
+      }
+      return best ? best.name : '';
+    }
+
+    function normalize(f){
+      return {
+        name: f.name || '',
+        lat: +f.lat, lng: +f.lng,
+        town: f.town || '',
+        size_acres: (f.size_acres!=null? +f.size_acres : null),
+        public_access: !!f.public_access,
+        has_bridge: !!f.has_bridge,
+        notes: f.notes || '',
+        image: f.image || '',
+        link: f.link || ''
+      };
+    }
+
+    function popupHTML(f){
+      return `<h3 style="margin:0 0 6px 0;">${f.name}</h3>
+        ${f.town?`<div><strong>Town:</strong> ${f.town}</div>`:''}`;
+    }
+
+    function renderMarkers(arr){
+      cluster.clearLayers();
+      const markers = arr.filter(f=>Number.isFinite(f.lat)&&Number.isFinite(f.lng)).map(f=>{
+        const m=L.marker([f.lat,f.lng],{title:f.name}); m.bindPopup(popupHTML(f)); return m;
+      });
+      cluster.addLayers(markers); map.addLayer(cluster);
+      if(markers.length){ try{ map.fitBounds(cluster.getBounds(), {padding:[30,30]}); }catch(e){} }
+    }
+
+    function renderList(arr){
+      elList.innerHTML='';
+      arr.forEach(f=>{
+        const li=document.createElement('li');
+        li.className='item';
+        li.innerHTML=`<h4>${f.name}</h4><div class="meta">${f.town||''}</div>`;
+        li.onclick=()=>{
+          const tgt=cluster.getLayers().find(m=>m.getLatLng().lat===f.lat && m.getLatLng().lng===f.lng);
+          if(tgt){ map.setView(tgt.getLatLng(), Math.max(map.getZoom(), 13)); tgt.openPopup(); }
+        };
+        elList.appendChild(li);
+      });
+      elVis.textContent=String(arr.length);
+      elTot.textContent=String(ALL.length);
+    }
+
+    function hydrateTowns(arr){
+      const set=[...new Set(arr.map(f=>f.town).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
+      elTown.innerHTML='';
+      set.forEach(t=>{ const o=document.createElement('option'); o.value=t; o.textContent=t; elTown.appendChild(o); });
+    }
+
+    function passFilters(f){
+      const q=(elSearch.value||'').trim().toLowerCase();
+      if (q) {
+        const hay = ((f.name||'') + ' ' + (f.town||'') + ' ' + (f.notes||'')).toLowerCase();
+        if (!hay.includes(q)) return false;
+      }
+      const selected = Array.from(elTown.selectedOptions).map(o => o.value);
+      if (selected.length && (!f.town || !selected.includes(f.town))) return false;
+      if (elSize.value && bucket(f.size_acres)!==elSize.value) return false;
+      return true;
+    }
+
+    function applyFilters(){
+      FILTERED = ALL.filter(passFilters);
+      renderMarkers(FILTERED);
+      renderList(FILTERED);
+    }
+
+    function wire(){
+      elSearch.addEventListener('input', debounce(applyFilters,120));
+      elTown.addEventListener('change', applyFilters);
+      elSize.addEventListener('change', applyFilters);
+      elReset.onclick=()=>{ elSearch.value=''; [...elTown.options].forEach(o=>o.selected=false); elSize.value=''; applyFilters(); };
+      document.getElementById('dl').onclick = () => {
+        const blob = new Blob([JSON.stringify(ALL, null, 2)], {type: 'application/json'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href=url; a.download='winnipesaukee_islands.json'; a.click();
+        setTimeout(()=>URL.revokeObjectURL(url), 3000);
+      };
+    }
+
+    async function overpassPOST(query){
+      for(const base of endpoints){
+        try{
+          log('POST to:', base);
+          const res = await fetch(base, {
+            method:'POST',
+            headers: {'Content-Type':'application/x-www-form-urlencoded; charset=UTF-8'},
+            body: 'data=' + encodeURIComponent(query)
+          });
+          if(!res.ok){ log('HTTP', res.status); continue; }
+          const json = await res.json();
+          return json.elements || [];
+        }catch(e){ log('Err', e.message || e); }
+      }
+      return [];
+    }
+
+    async function fetchIslands(){
+      const {s,w,n,e} = BBOX;
+      const q = `[out:json][timeout:40];
+        (
+          node["place"~"^(island|islet)$"](${s},${w},${n},${e});
+          way["place"~"^(island|islet)$"](${s},${w},${n},${e});
+          relation["place"~"^(island|islet)$"](${s},${w},${n},${e});
+          way["natural"="island"]["name"](${s},${w},${n},${e});
+          relation["natural"="island"]["name"](${s},${w},${n},${e});
+        );
+        out center tags;`;
+      const els = await overpassPOST(q);
+      log('Raw elements:', els.length);
+      const feats = els.map(e=>{
+        const name = e.tags && (e.tags.name || e.tags.alt_name || e.tags.old_name);
+        const lat = e.type==='node' ? e.lat : (e.center && e.center.lat);
+        const lon = e.type==='node' ? e.lon : (e.center && e.center.lon);
+        return name && lat && lon ? {name, lat, lng: lon} : null;
+      }).filter(Boolean);
+      const seen=new Set(), out=[];
+      for(const f of feats){
+        const k=f.name+'|'+f.lat.toFixed(5)+'|'+f.lng.toFixed(5);
+        if(!seen.has(k)){ seen.add(k); out.push(f); }
+      }
+      log('After dedupe:', out.length);
+      return out;
+    }
+
+    async function load(){
+      let feats = [];
+      if(DATA_URL){
+        log('Using provided JSON:', DATA_URL);
+        try {
+          const r = await fetch(DATA_URL, {cache:'no-store'});
+          const js = await r.json();
+          feats = (js||[]);
+        } catch(e){
+          log('Failed to load provided JSON, falling back to Overpass.');
+        }
+      }
+      if(!feats.length){
+        feats = await fetchIslands();
+      }
+      feats = feats.map(f => (f.town && f.town.length) ? f : {...f, town: nearestTown(f.lat, f.lng)});
+      ALL = feats.map(normalize);
+      hydrateTowns(ALL);
+      FILTERED = ALL.slice();
+      renderMarkers(FILTERED);
+      renderList(FILTERED);
+      wire();
+    }
+
+    load();
+  </script>
+</body>
+</html>
