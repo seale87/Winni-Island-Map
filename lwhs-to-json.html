@@ -1,0 +1,226 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>LWHS → islands.json helper</title>
+  <style>
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Helvetica,Arial;margin:20px;line-height:1.4}
+    .card{border:1px solid #e5e7eb;border-radius:12px;padding:16px;margin:12px 0}
+    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .btn{border:1px solid #d1d5db;background:#f9fafb;border-radius:8px;padding:8px 12px;cursor:pointer}
+    .mono{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;font-size:.9rem;color:#374151;white-space:pre-wrap}
+    input[type="file"]{display:block;margin:8px 0}
+    #log{max-height:220px;overflow:auto}
+    table{border-collapse:collapse;width:100%}
+    th,td{border:1px solid #e5e7eb;padding:6px 8px;text-align:left}
+  </style>
+</head>
+<body>
+  <h1>LWHS → <code>islands.json</code> helper</h1>
+  <p>This tool converts the <b>Lake Winnipesaukee Historical Society</b> island list into a JSON you can drop into your map. Because their site blocks automated access, do this:</p>
+  <ol>
+    <li>Open <code>https://www.lwhs.us/islands/islandlist.php</code> in your browser.</li>
+    <li>Press <b>Ctrl/Cmd+S</b> → “Webpage, HTML only” → save the file (e.g., <code>islandlist.html</code>).</li>
+    <li>Drop that saved file here.</li>
+  </ol>
+
+  <div class="card">
+    <h3>Step 1 — Load saved LWHS page</h3>
+    <input type="file" id="file" accept=".html,.htm,.xhtml,.php,.asp,.aspx,.txt"/>
+    <div id="loadStatus"></div>
+  </div>
+
+  <div class="card">
+    <h3>Step 2 — Extract islands and towns</h3>
+    <div class="row">
+      <button class="btn" id="extract">Extract</button>
+      <button class="btn" id="downloadBase" disabled>Download islands-with-towns.json</button>
+    </div>
+    <div id="counts"></div>
+    <div id="preview"></div>
+  </div>
+
+  <div class="card">
+    <h3>Step 3 — (Optional) Auto-add coordinates via Overpass</h3>
+    <p>If you click “Geocode with Overpass”, we’ll ask public Overpass servers for island coordinates within a Winnipesaukee bounding box, then match them by name (best-effort). This runs in your browser.</p>
+    <div class="row">
+      <button class="btn" id="geocode" disabled>Geocode with Overpass</button>
+      <button class="btn" id="downloadFull" disabled>Download final islands.json</button>
+    </div>
+    <div class="mono" id="log"></div>
+  </div>
+
+  <script>
+    let RAW_HTML = '';
+    let LIST = [];    // [{name, town}]
+    let FINAL = [];   // with lat/lng
+    const log = (...a)=>{ const el=document.getElementById('log'); el.textContent += a.join(' ') + '\\n'; };
+
+    document.getElementById('file').addEventListener('change', async (e)=>{
+      const f = e.target.files[0];
+      if(!f) return;
+      const txt = await f.text();
+      RAW_HTML = txt;
+      document.getElementById('loadStatus').textContent = 'Loaded ' + f.name + ' (' + f.size + ' bytes)';
+      document.getElementById('extract').disabled = false;
+    });
+
+    function normalizeName(s){
+      return (s||'').replace(/\s+/g,' ').replace(/\s+Islands?$/i, '').trim();
+    }
+    function normalizeTown(s){
+      return (s||'').replace(/\s+/g,' ').trim();
+    }
+
+    function parseLWHS(html){
+      // Try multiple strategies:
+      const out = [];
+      const doc = new DOMParser().parseFromString(html, 'text/html');
+
+      // Strategy A: look for a table with columns Island / Town or similar
+      const tables = Array.from(doc.querySelectorAll('table'));
+      for(const tbl of tables){
+        const headers = Array.from(tbl.querySelectorAll('th')).map(th=>th.textContent.toLowerCase().trim());
+        if(headers.join('|').includes('island') && headers.join('|').includes('town')){
+          const rows = Array.from(tbl.querySelectorAll('tr')).slice(1);
+          for(const tr of rows){
+            const cells = Array.from(tr.children);
+            if(cells.length<2) continue;
+            const name = normalizeName(cells[0].textContent);
+            const town = normalizeTown(cells[1].textContent);
+            if(name) out.push({name, town});
+          }
+        }
+      }
+      if(out.length) return out;
+
+      // Strategy B: look for lists with pattern: "Name — Town" or "Name (Town)"
+      const txt = doc.body.textContent || '';
+      const lines = txt.split(/\n+/).map(s=>s.trim()).filter(Boolean);
+      for(const line of lines){
+        // Match "Name - Town" or "Name — Town"
+        let m = line.match(/^(.+?)\s+[–-]\s+(.+?)$/);
+        if(m){
+          const name = normalizeName(m[1]);
+          const town = normalizeTown(m[2]);
+          if(name) out.push({name,town});
+          continue;
+        }
+        // Match "Name (Town)" style
+        m = line.match(/^(.+?)\s+\(([^)]+)\)\s*$/);
+        if(m){
+          const name = normalizeName(m[1]);
+          const town = normalizeTown(m[2]);
+          if(name) out.push({name,town});
+        }
+      }
+      return out;
+    }
+
+    document.getElementById('extract').addEventListener('click', ()=>{
+      LIST = parseLWHS(RAW_HTML);
+      const counts = document.getElementById('counts');
+      if(!LIST.length){
+        counts.innerHTML = '<b>No structured rows found.</b><br>Tip: make sure you saved <i>islandlist.php</i> as “Webpage, HTML only”.';
+        return;
+      }
+      counts.textContent = LIST.length + ' rows extracted.';
+      // Render preview
+      const prev = document.getElementById('preview');
+      const sample = LIST.slice(0, 20);
+      prev.innerHTML = '<table><thead><tr><th>Island</th><th>Town</th></tr></thead><tbody>' +
+        sample.map(r=>`<tr><td>${r.name}</td><td>${r.town}</td></tr>`).join('') +
+        '</tbody></table>' + (LIST.length>20?`<div>… plus ${LIST.length-20} more</div>`:'');
+
+      document.getElementById('downloadBase').disabled = false;
+      document.getElementById('geocode').disabled = false;
+    });
+
+    function downloadJSON(data, filename){
+      const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = filename; a.click();
+      setTimeout(()=>URL.revokeObjectURL(url), 3000);
+    }
+
+    document.getElementById('downloadBase').addEventListener('click', ()=>{
+      downloadJSON(LIST, 'islands-with-towns.json');
+    });
+
+    async function overpassPOST(query){
+      const endpoints = [
+        'https://overpass-api.de/api/interpreter',
+        'https://overpass.kumi.systems/api/interpreter',
+        'https://maps.mail.ru/osm/tools/overpass/api/interpreter'
+      ];
+      for(const base of endpoints){
+        try{
+          log('POST to:', base);
+          const res = await fetch(base, {
+            method:'POST',
+            headers:{'Content-Type':'application/x-www-form-urlencoded; charset=UTF-8'},
+            body:'data=' + encodeURIComponent(query)
+          });
+          if(!res.ok){ log('HTTP', res.status); continue; }
+          const js = await res.json();
+          return js.elements || [];
+        }catch(e){
+          log('Err', e.message || e);
+        }
+      }
+      return [];
+    }
+
+    async function fetchNamedIslands(){
+      const s=43.50, w=-71.50, n=43.80, e=-71.15;
+      const q = `[out:json][timeout:40];
+        (
+          node["place"~"^(island|islet)$"](${s},${w},${n},${e});
+          way["place"~"^(island|islet)$"](${s},${w},${n},${e});
+          relation["place"~"^(island|islet)$"](${s},${w},${n},${e});
+          way["natural"="island"]["name"](${s},${w},${n},${e});
+          relation["natural"="island"]["name"](${s},${w},${n},${e});
+        );
+        out center tags;`;
+      const els = await overpassPOST(q);
+      log('Overpass named features:', els.length);
+      const feats = els.map(e=>{
+        const name = e.tags && (e.tags.name || e.tags.alt_name || e.tags.old_name);
+        const lat = e.type==='node' ? e.lat : (e.center && e.center.lat);
+        const lon = e.type==='node' ? e.lon : (e.center && e.center.lon);
+        return name && lat && lon ? {name, lat, lng: lon} : null;
+      }).filter(Boolean);
+      return feats;
+    }
+
+    function byNameMap(arr){
+      const m = new Map();
+      arr.forEach(o=> m.set(o.name.toLowerCase(), o));
+      return m;
+    }
+
+    document.getElementById('geocode').addEventListener('click', async ()=>{
+      document.getElementById('geocode').disabled = true;
+      log('Loading islands from Overpass…');
+      const osm = await fetchNamedIslands();
+      const byName = byNameMap(osm);
+      const out = [];
+      let matched=0;
+      for(const row of LIST){
+        const hit = byName.get(row.name.toLowerCase());
+        if(hit){ matched++; out.push({name:row.name, town:row.town, lat:hit.lat, lng:hit.lng}); }
+        else { out.push({name:row.name, town:row.town, lat:null, lng:null}); }
+      }
+      log('Matched by name:', matched, '/', LIST.length);
+      FINAL = out;
+      document.getElementById('downloadFull').disabled = false;
+    });
+
+    document.getElementById('downloadFull').addEventListener('click', ()=>{
+      downloadJSON(FINAL, 'islands.json');
+    });
+  </script>
+</body>
+</html>
