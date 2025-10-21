@@ -20,6 +20,13 @@
     "notes": ""
   },
   {
+    "name": "Barndoor Gap",
+    "town": "Alton",
+    "lat": 43.56030,
+    "lng": -71.22922,
+    "notes": "Not Navigable"
+  },
+  {
     "name": "Battleship",
     "town": "Gilford",
     "lat": 43.5917806,
@@ -120,7 +127,7 @@
     "notes": ""
   },
   {
-    "name": "Black Snap",
+    "name": "Black Snap / Pearl",
     "town": "Alton",
     "lat": 43.55122,
     "lng": -71.30474,
@@ -480,6 +487,16 @@
     "notes": ""
   },
   {
+    "name": "Gate",
+    "town": "Wolfeboro",
+    "lat": 43.55843,
+    "lng": -71.20690,
+    "size_acres": null,
+    "public_access": null,
+    "has_bridge": null,
+    "notes": ""
+  },
+  {
     "name": "Ganzey",
     "town": "Gilford",
     "lat": 43.5917806,
@@ -501,7 +518,7 @@
   },
   {
     "name": "Gichigumi",
-    "town": "Gilford",
+    "town": "Alton",
     "lat": 43.55723,
     "lng": -71.30424,
     "size_acres": null,
@@ -1001,9 +1018,9 @@
   },
   {
     "name": "Little Mark",
-    "town": "Gilford",
-    "lat": 43.5917806,
-    "lng": -71.3858853,
+    "town": "Alton",
+    "lat": 43.53208,
+    "lng": -71.20648,
     "size_acres": null,
     "public_access": null,
     "has_bridge": null,
@@ -1060,10 +1077,10 @@
     "notes": ""
   },
   {
-    "name": "Little Plum",
-    "town": "Gilford",
-    "lat": 43.5917806,
-    "lng": -71.3858853,
+    "name": "Plum",
+    "town": "Alton",
+    "lat": 43.53357,
+    "lng": -71.22325,
     "size_acres": null,
     "public_access": null,
     "has_bridge": null,
@@ -1120,10 +1137,10 @@
     "notes": ""
   },
   {
-    "name": "Littlest Mud",
-    "town": "Gilford",
-    "lat": 43.5917806,
-    "lng": -71.3858853,
+    "name": "Mud",
+    "town": "Wolfeboro",
+    "lat": 43.55418,
+    "lng": -71.20521,
     "size_acres": null,
     "public_access": null,
     "has_bridge": null,
@@ -1501,9 +1518,9 @@
   },
   {
     "name": "Quarter Mile",
-    "town": "Gilford",
-    "lat": 43.5917806,
-    "lng": -71.3858853,
+    "town": "Alton",
+    "lat": 43.53137,
+    "lng": -71.21701,
     "size_acres": null,
     "public_access": null,
     "has_bridge": null,
@@ -1581,9 +1598,9 @@
   },
   {
     "name": "Shelter",
-    "town": "Gilford",
-    "lat": 43.5917806,
-    "lng": -71.3858853,
+    "town": "Wolfeboro",
+    "lat": 43.55952,
+    "lng": -71.20760,
     "size_acres": null,
     "public_access": null,
     "has_bridge": null,
@@ -1627,7 +1644,7 @@
     "size_acres": null,
     "public_access": null,
     "has_bridge": null,
-    "notes": ""
+    "notes": "FKA Little Rattlesnake; FKA Flanders"
   },
   {
     "name": "Small",
@@ -1770,6 +1787,16 @@
     "notes": ""
   },
   {
+    "name": "Upper Shore",
+    "town": "Wolfeboro",
+    "lat": 43.55878,
+    "lng": -71.20725,
+    "size_acres": null,
+    "public_access": null,
+    "has_bridge": null,
+    "notes": ""
+  },
+  {
     "name": "Woodmans Cove",
     "town": "Alton",
     "lat": 43.52207,
@@ -1777,7 +1804,7 @@
     "size_acres": null,
     "public_access": null,
     "has_bridge": null,
-    "notes": ""
+    "notes": "FKA Canney's"
   },
   {
     "name": "Mount Major",
