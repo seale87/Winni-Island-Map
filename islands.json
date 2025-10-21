@@ -1736,16 +1736,18 @@
     "has_bridge": null,
     "notes": ""
   },
-{
-  "name": "Stonedam",
-  "town": "Meredith",
-  "lat": 43.6292185,
-  "lng": -71.4355645,
-  "links": [
-    { "label": "Download Island Map", "href": "https://lrct.org/wp-content/uploads/2021/11/LRCT_Stonedam-Island-Trail-Map-Brochure-2021.pdf" }
-  ],
-  "notes": "Owned by the Lakes Region Conservation Trust https://www.lrct.org/"
-}
+[
+  {
+    "name": "Stonedam",
+    "town": "Meredith",
+    "lat": 43.6292185,
+    "lng": -71.4355645,
+    "links": [
+      { "label": "Download Island Map", "href": "https://lrct.org/wp-content/uploads/2021/11/LRCT_Stonedam-Island-Trail-Map-Brochure-2021.pdf" }
+    ],
+    "notes": "Owned by the Lakes Region Conservation Trust https://www.lrct.org/"
+  }
+]
   {
     "name": "Store",
     "town": "Tuftonboro",
