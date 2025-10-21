@@ -573,7 +573,7 @@
     "lng": -71.4241175,
     "size_acres": null,
     "public_access": null,
-    "has_bridge": null,
+    "has_bridge": true,
     "notes": ""
   },
   {
@@ -1333,7 +1333,7 @@
     "lng": -71.4501205,
     "size_acres": null,
     "public_access": null,
-    "has_bridge": ,
+    "has_bridge": true,
     "notes": ""
   },
   {
@@ -1397,10 +1397,20 @@
     "notes": ""
   },
   {
+    "name": "Shoal / Welcome",
+    "town": "Meridith",
+    "lat": 43.62715,
+    "lng": -71.43995,
+    "size_acres": null,
+    "public_access": null,
+    "has_bridge": null,
+    "notes": "AKA Wilcomb"
+  },
+  {
     "name": "Penny #1",
-    "town": "Gilford",
-    "lat": 43.5917806,
-    "lng": -71.3858853,
+    "town": "Meridith",
+    "lat": 43.62715,
+    "lng": -71.43995,
     "size_acres": null,
     "public_access": null,
     "has_bridge": null,
@@ -1727,14 +1737,14 @@
     "notes": ""
   },
   {
-    "name": "Stonedam",
-    "town": "Meredith",
-    "lat": 43.6292185,
-    "lng": -71.4355645,
-    "size_acres": null,
-    "public_access": null,
-    "has_bridge": null,
-    "notes": ""
+  "name": "Stonedam",
+  "town": "Meredith",
+  "lat": 43.6292185,
+  "lng": -71.4355645,
+  "links": {
+    "Download Island Map": "https://lrct.org/wp-content/uploads/2021/11/LRCT_Stonedam-Island-Trail-Map-Brochure-2021.pdf",
+  },
+  "notes": "Owned by the Lakes Region Conservation Trust https://www.lrct.org/"
   },
   {
     "name": "Store",
