@@ -515,8 +515,8 @@
     "lat": 43.67616,
     "lng": -71.375593,
     "size_acres": 0.1,
-    "public_access": no,
-    "has_bridge": no,
+    "public_access": null,
+    "has_bridge": null,
     "notes": ""
   },
   {
