@@ -120,6 +120,16 @@
     "notes": ""
   },
   {
+    "name": "Black Snap",
+    "town": "Alton",
+    "lat": 43.55122,
+    "lng": -71.30474,
+    "size_acres": null,
+    "public_access": null,
+    "has_bridge": null,
+    "notes": ""
+  },
+  {
     "name": "Blanche",
     "town": "Gilford",
     "lat": 43.5917806,
@@ -492,8 +502,8 @@
   {
     "name": "Gichigumi",
     "town": "Gilford",
-    "lat": 43.5917806,
-    "lng": -71.3858853,
+    "lat": 43.55723,
+    "lng": -71.30424,
     "size_acres": null,
     "public_access": null,
     "has_bridge": null,
@@ -504,9 +514,9 @@
     "town": "Center Harbor",
     "lat": 43.67616,
     "lng": -71.375593,
-    "size_acres": null,
-    "public_access": null,
-    "has_bridge": null,
+    "size_acres": 0.1,
+    "public_access": no,
+    "has_bridge": no,
     "notes": ""
   },
   {
@@ -1749,11 +1759,31 @@
     "has_bridge": null,
     "notes": ""
   },
-    {
-    "name": "Treasure",
+  {
+    "name": "Treasure / Redhead",
     "town": "Alton",
     "lat": 43.55118,
     "lng": -71.28249,
+    "size_acres": null,
+    "public_access": null,
+    "has_bridge": null,
+    "notes": ""
+  },
+  {
+    "name": "Woodmans Cove",
+    "town": "Alton",
+    "lat": 43.52207,
+    "lng": -71.26815,
+    "size_acres": null,
+    "public_access": null,
+    "has_bridge": null,
+    "notes": ""
+  },
+  {
+    "name": "Mount Major",
+    "town": "Alton",
+    "lat": 43.52146,
+    "lng": -71.26765,
     "size_acres": null,
     "public_access": null,
     "has_bridge": null,
