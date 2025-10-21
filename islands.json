@@ -1333,7 +1333,7 @@
     "lng": -71.4501205,
     "size_acres": null,
     "public_access": null,
-    "has_bridge": null,
+    "has_bridge": ,
     "notes": ""
   },
   {
