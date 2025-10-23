@@ -1,5 +1,15 @@
 [
   {
+    "name": "A07",
+    "town": "Meredith",
+    "lat": 43.68874,
+    "lng": -71.43493,
+    "size_acres": null,
+    "public_access": null,
+    "has_bridge": null,
+    "notes": "Name Unknown"
+  },
+  {
     "name": "Badger",
     "town": "Center Harbor",
     "lat": 43.724007,
@@ -38,9 +48,9 @@
   },
   {
     "name": "Beaver",
-    "town": "Center Harbor",
-    "lat": 43.673673,
-    "lng": -71.4371635,
+    "town": "Meredith",
+    "lat": 43.67600,
+    "lng": -71.43709,
     "size_acres": null,
     "public_access": null,
     "has_bridge": null,
@@ -58,9 +68,9 @@
   },
   {
     "name": "Becky’s Garden",
-    "town": "Gilford",
-    "lat": 43.5917806,
-    "lng": -71.3858853,
+    "town": "Meredith",
+    "lat": 43.68607,
+    "lng": -71.43159,
     "size_acres": null,
     "public_access": null,
     "has_bridge": null,
@@ -78,9 +88,9 @@
   },
   {
     "name": "Big Beaver",
-    "town": "Gilford",
-    "lat": 43.5917806,
-    "lng": -71.3858853,
+    "town": "Meredith",
+    "lat": 43.67356,
+    "lng": -71.43676,
     "size_acres": null,
     "public_access": null,
     "has_bridge": null,
@@ -118,7 +128,7 @@
   },
   {
     "name": "Black Cat",
-    "town": "Center Harbor",
+    "town": "Moultonborough / Meredith",
     "lat": 43.6842044,
     "lng": -71.4215387,
     "size_acres": null,
@@ -298,7 +308,7 @@
   },
   {
     "name": "Cow",
-    "town": "Wolfeboro",
+    "town": "Tuftonboro",
     "lat": 43.6277365,
     "lng": -71.3103515,
     "size_acres": null,
@@ -348,7 +358,7 @@
   },
   {
     "name": "Devens",
-    "town": "Wolfeboro",
+    "town": "Tuftonboro",
     "lat": 43.637038,
     "lng": -71.3193555,
     "size_acres": null,
@@ -408,17 +418,27 @@
   },
   {
     "name": "East Twin",
-    "town": "Gilford",
-    "lat": 43.5917806,
-    "lng": -71.3858853,
+    "town": "Tuftonboro",
+    "lat": 43.68422,
+    "lng": -71.31944,
     "size_acres": null,
     "public_access": null,
     "has_bridge": null,
     "notes": ""
   },
   {
+    "name": "Twin Islands",
+    "town": "Tuftonboro",
+    "lat": 43.68418,
+    "lng": -71.32038,
+    "size_acres": null,
+    "public_access": null,
+    "has_bridge": null,
+    "notes": "Gem and East Twin"
+  },
+  {
     "name": "Echo",
-    "town": "Wolfeboro",
+    "town": "Tuftonboro",
     "lat": 43.6175317,
     "lng": -71.3078177,
     "size_acres": null,
@@ -468,7 +488,7 @@
   },
   {
     "name": "Five Mile",
-    "town": "Center Harbor",
+    "town": "Moultonborough / Meredith",
     "lat": 43.6587235,
     "lng": -71.387484,
     "size_acres": null,
@@ -508,9 +528,9 @@
   },
   {
     "name": "Gem",
-    "town": "Gilford",
-    "lat": 43.5917806,
-    "lng": -71.3858853,
+    "town": "Tuftonboro",
+    "lat": 43.68415,
+    "lng": -71.32121,
     "size_acres": null,
     "public_access": null,
     "has_bridge": null,
@@ -528,7 +548,7 @@
   },
   {
     "name": "Glines",
-    "town": "Center Harbor",
+    "town": "Moultonborough",
     "lat": 43.67616,
     "lng": -71.375593,
     "size_acres": 0.1,
@@ -548,7 +568,7 @@
   },
   {
     "name": "Goose",
-    "town": "Center Harbor",
+    "town": "Moultonborough",
     "lat": 43.6801739,
     "lng": -71.3815086,
     "size_acres": null,
@@ -678,7 +698,7 @@
   },
   {
     "name": "Hawk’s Nest",
-    "town": "Center Harbor",
+    "town": "Meredith",
     "lat": 43.671056,
     "lng": -71.420781,
     "size_acres": null,
@@ -718,7 +738,7 @@
   },
   {
     "name": "Hermit",
-    "town": "Center Harbor",
+    "town": "Moultonborough",
     "lat": 43.6804733,
     "lng": -71.3736852,
     "size_acres": null,
@@ -738,7 +758,7 @@
   },
   {
     "name": "Hull",
-    "town": "Center Harbor",
+    "town": "Moultonborough / Meredith",
     "lat": 43.6795155,
     "lng": -71.4148265,
     "size_acres": null,
@@ -918,9 +938,9 @@
   },
   {
     "name": "Little Beaver",
-    "town": "Gilford",
-    "lat": 43.5917806,
-    "lng": -71.3858853,
+    "town": "Meredith",
+    "lat": 43.67496,
+    "lng": -71.43522,
     "size_acres": null,
     "public_access": null,
     "has_bridge": null,
@@ -928,7 +948,7 @@
   },
   {
     "name": "Little Birch",
-    "town": "Wolfeboro",
+    "town": "Tuftonboro",
     "lat": 43.6234105,
     "lng": -71.2982835,
     "size_acres": null,
@@ -1108,9 +1128,9 @@
   },
   {
     "name": "Little Two Mile",
-    "town": "Gilford",
-    "lat": 43.5917806,
-    "lng": -71.3858853,
+    "town": "Meredith",
+    "lat": 43.68935,
+    "lng": -71.43580,
     "size_acres": null,
     "public_access": null,
     "has_bridge": null,
@@ -1258,9 +1278,9 @@
   },
   {
     "name": "Middle Beaver",
-    "town": "Gilford",
-    "lat": 43.5917806,
-    "lng": -71.3858853,
+    "town": "Meredith",
+    "lat": 43.67527,
+    "lng": -71.43429,
     "size_acres": null,
     "public_access": null,
     "has_bridge": null,
@@ -1275,6 +1295,16 @@
     "public_access": null,
     "has_bridge": null,
     "notes": ""
+  },
+  {
+    "name": "Minister",
+    "town": "Moultonborough",
+    "lat": 43.68459,
+    "lng": -71.41413,
+    "size_acres": null,
+    "public_access": null,
+    "has_bridge": null,
+    "notes": "AKA Blueberry"
   },
   {
     "name": "Mt. Major",
@@ -1298,9 +1328,9 @@
   },
   {
     "name": "Nabby’s",
-    "town": "Gilford",
-    "lat": 43.5917806,
-    "lng": -71.3858853,
+    "town": "Meredith",
+    "lat": 43.67176,
+    "lng": -71.42125,
     "size_acres": null,
     "public_access": null,
     "has_bridge": null,
@@ -1487,10 +1517,10 @@
     "notes": ""
   },
   {
-    "name": "PixieRock #3",
-    "town": "Gilford",
-    "lat": 43.5917806,
-    "lng": -71.3858853,
+    "name": "Rock #3",
+    "town": "Meredith",
+    "lat": 43.67390,
+    "lng": -71.42180,
     "size_acres": null,
     "public_access": null,
     "has_bridge": null,
@@ -1548,7 +1578,7 @@
   },
   {
     "name": "Ragged",
-    "town": "Wolfeboro",
+    "town": "Tuftonboro",
     "lat": 43.6299674,
     "lng": -71.3246336,
     "size_acres": null,
@@ -1588,7 +1618,7 @@
   },
   {
     "name": "Sandy",
-    "town": "Gilford",
+    "town": "Tuftonboro",
     "lat": 43.6227594,
     "lng": -71.3347145,
     "size_acres": null,
@@ -1755,9 +1785,9 @@
   },
   {
     "name": "Three Mile",
-    "town": "Gilford",
-    "lat": 43.5917806,
-    "lng": -71.3858853,
+    "town": "Meredith",
+    "lat": 43.67366,
+    "lng": -71.42399,
     "size_acres": null,
     "public_access": null,
     "has_bridge": null,
@@ -1835,9 +1865,9 @@
   },
   {
     "name": "Two Mile",
-    "town": "Gilford",
-    "lat": 43.5917806,
-    "lng": -71.3858853,
+    "town": "Meredith",
+    "lat": 43.68958,
+    "lng": -71.43438,
     "size_acres": null,
     "public_access": null,
     "has_bridge": null,
@@ -1855,7 +1885,7 @@
   },
   {
     "name": "Wallace",
-    "town": "Center Harbor",
+    "town": "Moultonborough",
     "lat": 43.6921737,
     "lng": -71.4130568,
     "size_acres": null,
